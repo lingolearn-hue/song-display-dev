@@ -62,28 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('ocr-status').textContent = '';
   });
 
-  // ── Service worker version notifications ──────────────────
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.addEventListener('message', e => {
-      if (e.data && e.data.type === 'NEW_VERSION') {
-        showUpdateBanner();
-      }
-    });
-  }
-
-  function showUpdateBanner() {
-    let banner = document.getElementById('update-banner');
-    if (banner) return;  // already showing
-    banner = document.createElement('div');
-    banner.id = 'update-banner';
-    banner.className = 'update-banner';
-    banner.innerHTML = 'New version available. <button id="update-reload">Reload</button>';
-    document.body.appendChild(banner);
-    document.getElementById('update-reload').addEventListener('click', () => {
-      window.location.reload();
-    });
-  }
-
   // ── Screen navigation ─────────────────────────────────────
   const navTabs = document.querySelectorAll('.nav-tab');
 
@@ -522,7 +500,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         label:    'Original',
         format,
         content,
-        language: null,
+        language: 'en',
       }],
       setlistIds: [],
     };
@@ -581,7 +559,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const result = await DB.importSbook(trimmed, false);
         await loadSongs();
         await SetlistManager.load(allSongs);
-        showToast(`Imported ${result.imported} song(s). ${result.skipped} already existed.`);
+        const parts = [`${result.imported} song(s) imported`];
+        if (result.skipped) parts.push(`${result.skipped} song(s) skipped (already existed)`);
+        if (result.setlistsImported) parts.push(`${result.setlistsImported} setlist(s) imported`);
+        if (result.setlistsSkipped) parts.push(`${result.setlistsSkipped} setlist(s) skipped (already existed)`);
+        showToast(parts.join(', ') + '.');
         showScreen('songs');
       } catch(err) {
         showToast('Import failed: ' + err.message, true);
