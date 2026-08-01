@@ -154,16 +154,28 @@ const DB = (() => {
 
   async function importSbook(json, overwrite = false) {
     const data = JSON.parse(json);
-    const existing = await getAllSongs();
-    const existingIds = new Set(existing.map(s => s.id));
-    let imported = 0, skipped = 0;
+    const existingSongs   = await getAllSongs();
+    const existingSongIds = new Set(existingSongs.map(s => s.id));
+    let songsImported = 0, songsSkipped = 0;
     for (const song of (data.songs || [])) {
-      if (existingIds.has(song.id) && !overwrite) { skipped++; continue; }
+      if (existingSongIds.has(song.id) && !overwrite) { songsSkipped++; continue; }
       await putSong(song);
-      imported++;
+      songsImported++;
     }
-    for (const sl of (data.setlists || [])) await putSetlist(sl);
-    return { imported, skipped };
+
+    const existingSetlists   = await getAllSetlists();
+    const existingSlIds      = new Set(existingSetlists.map(s => s.id));
+    let setlistsImported = 0, setlistsSkipped = 0;
+    for (const sl of (data.setlists || [])) {
+      if (existingSlIds.has(sl.id) && !overwrite) { setlistsSkipped++; continue; }
+      await putSetlist(sl);
+      setlistsImported++;
+    }
+
+    return {
+      imported: songsImported, skipped: songsSkipped,
+      setlistsImported, setlistsSkipped,
+    };
   }
 
   return {
