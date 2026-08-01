@@ -149,9 +149,22 @@ body.viewing #screen-viewer { display: flex; }
 .song-item:hover { background: var(--surface); }
 .song-item:active { background: var(--chord-bg); }
 
-.song-item-info { flex: 1; }
-.song-item-title { font-size: 14px; font-weight: 500; }
-.song-item-artist { font-size: 12px; color: var(--sub); margin-top: 2px; }
+.song-item-info { flex: 1; min-width: 0; }
+.song-item-title {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.song-item-artist {
+  font-size: 12px;
+  color: var(--sub);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .song-item-key {
   font-family: var(--font-song);
@@ -1174,35 +1187,6 @@ body.editor-open .editor-backdrop {
   background: var(--chord-bg);
 }
 
-/* ── Update available banner ── */
-.update-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: var(--chord);
-  color: #0d1117;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  z-index: 9999;
-}
-.update-banner button {
-  background: rgba(0,0,0,.15);
-  border: none;
-  border-radius: 5px;
-  color: #0d1117;
-  font-weight: 700;
-  font-size: 12px;
-  padding: 4px 12px;
-  cursor: pointer;
-}
-.update-banner button:hover { background: rgba(0,0,0,.25); }
-
 /* ══════════════════════════════════════════════
    v0.4 additions
 ══════════════════════════════════════════════ */
@@ -1482,7 +1466,8 @@ body.voice-active .voice-status { opacity: 1; }
 .filter-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px;
   padding: 6px 10px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -1490,7 +1475,7 @@ body.voice-active .voice-status { opacity: 1; }
 
 .filter-select {
   height: 28px;
-  padding: 0 8px;
+  padding: 0 6px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1499,7 +1484,9 @@ body.voice-active .voice-status { opacity: 1; }
   font-family: var(--font-ui);
   cursor: pointer;
   outline: none;
-  min-width: 110px;
+  min-width: 0;
+  max-width: 45%;
+  flex: 1 1 100px;
 }
 .filter-select:focus { border-color: var(--chord); }
 .filter-select option { background: var(--surface); color: var(--text); }
@@ -1514,6 +1501,7 @@ body.voice-active .voice-status { opacity: 1; }
   font-size: 12px;
   cursor: pointer;
   font-family: var(--font-ui);
+  flex-shrink: 0;
 }
 .filter-clear-btn.hidden { display: none; }
 .filter-clear-btn:hover { background: rgba(224,96,96,.08); }
