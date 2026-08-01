@@ -566,6 +566,20 @@ const Viewer = (() => {
     });
     DB.getSetting('nightMode', true).then(v => syncNight(v));
     loadMemory();
+
+    // ── Re-paginate once web fonts finish loading ─────────────
+    // Section labels (Inter) and lyric lines (IBM Plex Mono) load via a
+    // non-blocking <link media="print"> pattern for fast first paint. If a
+    // song is paginated using fallback-font metrics before the real fonts
+    // arrive, the browser's post-load reflow can shift section heights just
+    // enough to clip trailing lyric lines off the bottom of a page. Once
+    // fonts are confirmed loaded, re-run pagination on the current song so
+    // page breaks are computed against final, accurate font metrics.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        if (song && !scrolling) rerender();
+      }).catch(() => { /* font loading API unsupported or failed — ignore */ });
+    }
   }
 
   return { init, open, releaseWakeLock };
