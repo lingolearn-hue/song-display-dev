@@ -1,6 +1,6 @@
-// sw.js — song-display service worker v6.1
+// sw.js — song-display service worker v9.6
 // APP_VERSION must be bumped with every release.
-const APP_VERSION = '9.5';
+const APP_VERSION = '9.6';
 const CACHE       = 'song-display-' + APP_VERSION;
 
 // Files to pre-cache. data.js is intentionally excluded —
@@ -36,7 +36,7 @@ self.addEventListener('install', e => {
   );
 });
 
-// ── Activate: purge old caches, notify clients ────────────
+// ── Activate: purge old caches ─────────────────────────────
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
@@ -44,11 +44,6 @@ self.addEventListener('activate', e => {
         keys.filter(k => k !== CACHE).map(k => caches.delete(k))
       ))
       .then(() => self.clients.claim())
-      .then(() => {
-        self.clients.matchAll({ type: 'window' }).then(clients =>
-          clients.forEach(c => c.postMessage({ type: 'NEW_VERSION', version: APP_VERSION }))
-        );
-      })
   );
 });
 
