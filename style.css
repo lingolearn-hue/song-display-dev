@@ -195,7 +195,7 @@ body.viewing #screen-viewer { display: flex; }
 .viewer-page {
   position: absolute;
   inset: 0;
-  padding: 48px 32px 80px;
+  padding: 10px 14px 34px;
   font-family: var(--font-song);
   font-size: var(--font-size);
   line-height: 1.85;
@@ -204,7 +204,7 @@ body.viewing #screen-viewer { display: flex; }
 
 .viewer-page.two-col {
   columns: 2;
-  column-gap: 40px;
+  column-gap: 24px;
 }
 
 /* ── Chord and lyric rendering (ruby-style) ── */
@@ -282,7 +282,7 @@ body.viewing #screen-viewer { display: flex; }
   color: var(--sub);
   font-size: 16px;
   cursor: pointer;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: var(--radius);
   flex-shrink: 0;
   transition: color .15s;
@@ -802,7 +802,7 @@ body.scrolling .page-indicator { opacity: 0; }
 .text-tab.active { color: var(--chord); border-bottom-color: var(--chord); }
 
 .viewer-screen .viewer-content {
-  top: 44px; /* below viewer-top-bar */
+  top: 36px; /* below viewer-top-bar */
 }
 
 /* ── Import preview ── */
@@ -1372,8 +1372,8 @@ body.voice-active .voice-status { opacity: 1; }
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--sub);
-  font-size: 16px;
-  padding: 4px 10px;
+  font-size: 15px;
+  padding: 3px 9px;
   cursor: pointer;
   transition: color .15s, border-color .15s;
   white-space: nowrap;
@@ -1453,14 +1453,29 @@ body.voice-active .voice-status { opacity: 1; }
 .viewer-top-bar {
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 44px;
+  height: 36px;
   display: flex;
   align-items: center;
-  padding: 0 6px;
-  gap: 4px;
-  background: linear-gradient(to bottom, var(--bg) 65%, transparent);
+  padding: 0 4px;
+  gap: 3px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
   z-index: 30;
 }
+
+/* Font size +/- buttons in top bar */
+.viewer-font-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--sub);
+  font-size: 13px;
+  padding: 3px 7px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.viewer-font-btn:hover { color: var(--chord); border-color: var(--chord); }
 
 /* ── Filter row — native selects ── */
 .filter-row {
