@@ -91,12 +91,12 @@ const Viewer = (() => {
     const contentEl = el.viewerContent();
     const pageEl    = el.viewerPage();
     const cs        = getComputedStyle(pageEl);
-    const padTop    = parseFloat(cs.paddingTop)    || 48;
-    const padBottom = parseFloat(cs.paddingBottom) || 80;
+    const padTop    = parseFloat(cs.paddingTop)    || 10;
+    const padBottom = parseFloat(cs.paddingBottom) || 34;
     const availH    = contentEl.clientHeight - padTop - padBottom;
     const availW    = contentEl.clientWidth
-                    - (parseFloat(cs.paddingLeft)  || 32)
-                    - (parseFloat(cs.paddingRight) || 32);
+                    - (parseFloat(cs.paddingLeft)  || 14)
+                    - (parseFloat(cs.paddingRight) || 14);
 
     const probe = document.createElement('div');
     probe.setAttribute('aria-hidden', 'true');
@@ -505,6 +505,8 @@ const Viewer = (() => {
 
     $('font-up').addEventListener('click',        () => { fontSize = Math.min(28, fontSize+1); saveMemory(); rerender(); });
     $('font-down').addEventListener('click',      () => { fontSize = Math.max(11, fontSize-1); saveMemory(); rerender(); });
+    $('viewer-font-up').addEventListener('click',   () => { fontSize = Math.min(28, fontSize+1); saveMemory(); rerender(); });
+    $('viewer-font-down').addEventListener('click', () => { fontSize = Math.max(11, fontSize-1); saveMemory(); rerender(); });
     $('transpose-up').addEventListener('click',   () => { transpose = transpose + 1; saveMemory(); rerender(); });
     $('transpose-down').addEventListener('click', () => { transpose = transpose - 1; saveMemory(); rerender(); });
     $('capo-up').addEventListener('click',        () => { capo = Math.min(9, capo+1); el.capoVal().textContent = capo; });
