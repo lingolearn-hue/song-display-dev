@@ -1706,20 +1706,158 @@ html { touch-action: manipulation; }
 .tuner-hint-error { color: var(--danger); }
 
 /* ══════════════════════════════════════════════
-   Trainer (placeholder)
+   Trainer — Chord Viewer
 ══════════════════════════════════════════════ */
 
-.trainer-placeholder {
+.trainer-wrap {
   flex: 1;
   display: flex;
   flex-direction: column;
+  padding: 16px;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+/* ── Search ── */
+.chord-search-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.chord-search-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+  font-family: var(--font-ui);
+}
+.chord-search-input:focus { border-color: var(--chord); }
+
+.chord-search-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0,0,0,.4);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 100;
+}
+.chord-search-results.hidden { display: none; }
+
+.chord-search-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font-song);
+  cursor: pointer;
+}
+.chord-search-item:last-child { border-bottom: none; }
+.chord-search-item:hover { background: var(--chord-bg); color: var(--chord); }
+
+.chord-search-empty {
+  padding: 14px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ── Diagram display ── */
+.chord-diagram-container {
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 24px;
-  text-align: center;
-  color: var(--sub);
+  flex-shrink: 0;
+  min-height: 220px;
 }
-.trainer-placeholder-icon { font-size: 44px; margin-bottom: 8px; }
-.trainer-placeholder h3 { font-size: 17px; color: var(--text); font-weight: 600; }
-.trainer-placeholder p { font-size: 13px; color: var(--muted); max-width: 240px; }
+
+.chord-diagram-svg {
+  width: 200px;
+  height: auto;
+}
+
+.diagram-title {
+  font-family: var(--font-song);
+  font-size: 20px;
+  font-weight: 600;
+  fill: var(--text);
+}
+.diagram-basefret {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  fill: var(--muted);
+}
+.diagram-nut { fill: var(--text); }
+.diagram-fretline { stroke: var(--border); stroke-width: 1; }
+.diagram-string { stroke: var(--muted); stroke-width: 1; }
+.diagram-barre {
+  stroke: var(--chord);
+  stroke-width: 12;
+  stroke-linecap: round;
+  opacity: .35;
+}
+.diagram-dot { fill: var(--chord); }
+.diagram-finger {
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 700;
+  fill: #0d1117;
+}
+.diagram-open {
+  fill: none;
+  stroke: var(--sub);
+  stroke-width: 1.5;
+}
+.diagram-muted {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  fill: var(--muted);
+}
+
+/* ── Quick-access grid ── */
+.chord-quick-label {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  flex-shrink: 0;
+}
+
+.chord-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.chord-quick-btn {
+  height: 44px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-song);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.chord-quick-btn:hover { border-color: var(--chord); }
+.chord-quick-btn.active {
+  background: var(--chord-bg);
+  border-color: var(--chord);
+  color: var(--chord);
+}
