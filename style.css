@@ -96,17 +96,24 @@ html, body {
   display: none;
   position: absolute;
   top: 48px;
-  left: 0; right: 0; bottom: 0;
+  left: 0; right: 0; bottom: 56px; /* reserve space for bottom mode nav */
   overflow: hidden;
 }
 .screen.active { display: flex; flex-direction: column; }
 
-/* viewer hides nav */
+/* viewer hides both navs, goes full height */
 .viewer-screen {
   top: 0 !important;
+  bottom: 0 !important;
 }
 body.viewing #main-nav { display: none; }
+body.viewing #mode-nav { display: none; }
 body.viewing #screen-viewer { display: flex; }
+
+/* Tuner/Trainer have no songbook sub-nav above them, only the bottom mode nav */
+#screen-tuner, #screen-trainer {
+  top: 0;
+}
 
 /* ══════════════════════════════════════════════
    SONG LIST
@@ -1523,3 +1530,196 @@ body.voice-active .voice-status { opacity: 1; }
 
 /* ── Block double-tap zoom ── */
 html { touch-action: manipulation; }
+
+/* ══════════════════════════════════════════════
+   Bottom mode nav — Songbook / Tuner / Trainer
+══════════════════════════════════════════════ */
+
+#mode-nav {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 56px;
+  display: flex;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  z-index: 50;
+}
+
+.mode-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  color: var(--sub);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: color .15s;
+}
+.mode-tab.active { color: var(--chord); }
+.mode-icon  { font-size: 19px; line-height: 1; }
+.mode-label { font-size: 10px; line-height: 1; }
+
+/* ══════════════════════════════════════════════
+   Tuner
+══════════════════════════════════════════════ */
+
+.tuner-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.tuner-string-row {
+  display: flex;
+  gap: 8px;
+}
+
+.tuner-string-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--sub);
+  font-family: var(--font-song);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.tuner-string-btn.selected {
+  border-color: var(--chord);
+  color: var(--chord);
+}
+.tuner-string-btn.nearest {
+  background: var(--chord-bg);
+  border-color: var(--chord);
+  color: var(--chord);
+}
+
+.tuner-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.tuner-note {
+  font-family: var(--font-song);
+  font-size: 64px;
+  font-weight: 600;
+  color: var(--text);
+  min-height: 76px;
+  line-height: 1;
+}
+
+.tuner-freq {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: var(--font-song);
+}
+
+.tuner-meter {
+  width: 100%;
+  max-width: 320px;
+  margin-top: 8px;
+}
+
+.tuner-meter-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 0 4px 4px;
+}
+.tuner-meter-center-mark { color: var(--sub); }
+
+.tuner-meter-track {
+  position: relative;
+  height: 6px;
+  background: var(--surface);
+  border-radius: 3px;
+  overflow: visible;
+}
+
+.tuner-meter-center-line {
+  position: absolute;
+  left: 50%; top: -6px;
+  width: 2px; height: 18px;
+  background: var(--sub);
+  transform: translateX(-50%);
+}
+
+.tuner-meter-needle {
+  position: absolute;
+  left: 50%; top: -8px;
+  width: 4px; height: 22px;
+  border-radius: 2px;
+  background: var(--muted);
+  transform: translateX(-50%);
+  transition: transform .1s ease-out, background .15s;
+}
+.tuner-meter-needle.in-tune { background: #5fd97a; }
+.tuner-meter-needle.sharp   { background: #e0a860; }
+.tuner-meter-needle.flat    { background: #e0a860; }
+
+.tuner-cents {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+  font-family: var(--font-song);
+}
+
+.tuner-mic-btn {
+  padding: 12px 28px;
+  border-radius: 24px;
+  border: 1px solid var(--chord);
+  background: var(--chord-bg);
+  color: var(--chord);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  transition: background .15s, color .15s;
+}
+.tuner-mic-btn.active {
+  background: var(--chord);
+  color: #0d1117;
+}
+
+.tuner-hint {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  max-width: 280px;
+}
+.tuner-hint-error { color: var(--danger); }
+
+/* ══════════════════════════════════════════════
+   Trainer (placeholder)
+══════════════════════════════════════════════ */
+
+.trainer-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+  color: var(--sub);
+}
+.trainer-placeholder-icon { font-size: 44px; margin-bottom: 8px; }
+.trainer-placeholder h3 { font-size: 17px; color: var(--text); font-weight: 600; }
+.trainer-placeholder p { font-size: 13px; color: var(--muted); max-width: 240px; }
