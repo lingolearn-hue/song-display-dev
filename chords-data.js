@@ -1,0 +1,162 @@
+// chords-data.js — Guitar chord chart database
+//
+// Fret data format per chord: { frets: [E,A,D,G,B,e], fingers: [...], barre: {fret, from, to} | null, baseFret: N }
+//   frets: fret number per string, low E to high e. -1 = muted, 0 = open.
+//   fingers: 0 = open/muted, 1-4 = finger index (for display only).
+//   baseFret: the fret the diagram starts at (1 for open-position chords).
+//   barre: { fret, from, to } — string indices (0=low E .. 5=high e) covered by a barre, or null.
+//
+// Standard, widely-used voicings — open chords where possible, barre (E-shape/A-shape)
+// as the common fallback for chords with no practical open form.
+
+const CHORD_LIBRARY = {
+
+  // ── C ──────────────────────────────────────────────────────
+  'C':     { frets: [-1,3,2,0,1,0], fingers: [0,3,2,0,1,0], barre: null, baseFret: 1 },
+  'Cm':    { frets: [-1,3,1,0,1,-1], fingers: [0,3,1,0,2,0], barre: null, baseFret: 1 },
+  'C7':    { frets: [-1,3,2,3,1,0], fingers: [0,3,2,4,1,0], barre: null, baseFret: 1 },
+  'Cmaj7': { frets: [-1,3,2,0,0,0], fingers: [0,3,2,0,0,0], barre: null, baseFret: 1 },
+  'Cm7':   { frets: [-1,3,1,3,1,-1], fingers: [0,3,1,4,2,0], barre: null, baseFret: 1 },
+  'Csus2': { frets: [-1,3,0,0,1,-1], fingers: [0,3,0,0,1,0], barre: null, baseFret: 1 },
+  'Csus4': { frets: [-1,3,3,0,1,-1], fingers: [0,2,3,0,1,0], barre: null, baseFret: 1 },
+  'Cdim':  { frets: [-1,3,4,2,4,-1], fingers: [0,2,4,1,3,0], barre: null, baseFret: 1 },
+  'Caug':  { frets: [-1,3,2,1,1,0], fingers: [0,4,3,1,1,0], barre: null, baseFret: 1 },
+
+  // ── C# / Db ──────────────────────────────────────────────
+  'C#':     { frets: [-1,4,6,6,6,4], fingers: [0,1,3,3,3,1], barre: { fret: 4, from: 1, to: 5 }, baseFret: 4 },
+  'C#m':    { frets: [-1,4,6,6,5,4], fingers: [0,1,3,4,2,1], barre: { fret: 4, from: 1, to: 5 }, baseFret: 4 },
+  'C#7':    { frets: [-1,4,6,4,6,4], fingers: [0,1,3,1,4,1], barre: { fret: 4, from: 1, to: 5 }, baseFret: 4 },
+  'C#maj7': { frets: [-1,4,6,5,6,4], fingers: [0,1,4,2,3,1], barre: { fret: 4, from: 1, to: 5 }, baseFret: 4 },
+  'C#m7':   { frets: [-1,4,6,4,5,4], fingers: [0,1,3,1,2,1], barre: { fret: 4, from: 1, to: 5 }, baseFret: 4 },
+  'C#sus2': { frets: [-1,4,6,6,4,4], fingers: [0,1,3,4,1,1], barre: { fret: 4, from: 1, to: 5 }, baseFret: 4 },
+  'C#sus4': { frets: [-1,4,6,6,7,4], fingers: [0,1,2,3,4,1], barre: { fret: 4, from: 1, to: 5 }, baseFret: 4 },
+  'C#dim':  { frets: [-1,4,5,3,5,-1], fingers: [0,2,4,1,3,0], barre: null, baseFret: 3 },
+  'C#aug':  { frets: [-1,4,3,2,2,1], fingers: [0,4,3,2,2,1], barre: null, baseFret: 1 },
+
+  // ── D ──────────────────────────────────────────────────────
+  'D':     { frets: [-1,-1,0,2,3,2], fingers: [0,0,0,1,3,2], barre: null, baseFret: 1 },
+  'Dm':    { frets: [-1,-1,0,2,3,1], fingers: [0,0,0,2,3,1], barre: null, baseFret: 1 },
+  'D7':    { frets: [-1,-1,0,2,1,2], fingers: [0,0,0,2,1,3], barre: null, baseFret: 1 },
+  'Dmaj7': { frets: [-1,-1,0,2,2,2], fingers: [0,0,0,1,1,1], barre: { fret: 2, from: 3, to: 5 }, baseFret: 1 },
+  'Dm7':   { frets: [-1,-1,0,2,1,1], fingers: [0,0,0,3,1,1], barre: { fret: 1, from: 4, to: 5 }, baseFret: 1 },
+  'Dsus2': { frets: [-1,-1,0,2,3,0], fingers: [0,0,0,1,2,0], barre: null, baseFret: 1 },
+  'Dsus4': { frets: [-1,-1,0,2,3,3], fingers: [0,0,0,1,2,3], barre: null, baseFret: 1 },
+  'Ddim':  { frets: [-1,-1,0,1,3,1], fingers: [0,0,0,1,3,2], barre: null, baseFret: 1 },
+  'Daug':  { frets: [-1,-1,0,3,3,2], fingers: [0,0,0,2,3,1], barre: null, baseFret: 1 },
+
+  // ── D# / Eb ──────────────────────────────────────────────
+  'D#':     { frets: [-1,6,8,8,8,6], fingers: [0,1,3,3,3,1], barre: { fret: 6, from: 1, to: 5 }, baseFret: 6 },
+  'D#m':    { frets: [-1,6,8,8,7,6], fingers: [0,1,3,4,2,1], barre: { fret: 6, from: 1, to: 5 }, baseFret: 6 },
+  'D#7':    { frets: [-1,6,8,6,8,6], fingers: [0,1,3,1,4,1], barre: { fret: 6, from: 1, to: 5 }, baseFret: 6 },
+  'D#maj7': { frets: [-1,6,8,7,8,6], fingers: [0,1,4,2,3,1], barre: { fret: 6, from: 1, to: 5 }, baseFret: 6 },
+  'D#m7':   { frets: [-1,6,8,6,7,6], fingers: [0,1,3,1,2,1], barre: { fret: 6, from: 1, to: 5 }, baseFret: 6 },
+  'D#sus2': { frets: [-1,6,8,8,6,6], fingers: [0,1,3,4,1,1], barre: { fret: 6, from: 1, to: 5 }, baseFret: 6 },
+  'D#sus4': { frets: [-1,6,8,8,9,6], fingers: [0,1,2,3,4,1], barre: { fret: 6, from: 1, to: 5 }, baseFret: 6 },
+  'D#dim':  { frets: [-1,-1,1,2,1,2], fingers: [0,0,1,3,1,4], barre: { fret: 1, from: 2, to: 4 }, baseFret: 1 },
+  'D#aug':  { frets: [-1,6,5,4,4,3], fingers: [0,4,3,2,2,1], barre: null, baseFret: 3 },
+
+  // ── E ──────────────────────────────────────────────────────
+  'E':     { frets: [0,2,2,1,0,0], fingers: [0,2,3,1,0,0], barre: null, baseFret: 1 },
+  'Em':    { frets: [0,2,2,0,0,0], fingers: [0,2,3,0,0,0], barre: null, baseFret: 1 },
+  'E7':    { frets: [0,2,0,1,0,0], fingers: [0,2,0,1,0,0], barre: null, baseFret: 1 },
+  'Emaj7': { frets: [0,2,1,1,0,0], fingers: [0,3,1,2,0,0], barre: null, baseFret: 1 },
+  'Em7':   { frets: [0,2,0,0,0,0], fingers: [0,2,0,0,0,0], barre: null, baseFret: 1 },
+  'Esus2': { frets: [0,2,2,4,0,0], fingers: [0,1,2,4,0,0], barre: null, baseFret: 1 },
+  'Esus4': { frets: [0,2,2,2,0,0], fingers: [0,1,2,3,0,0], barre: null, baseFret: 1 },
+  'Edim':  { frets: [0,1,2,0,-1,-1], fingers: [0,1,2,0,0,0], barre: null, baseFret: 1 },
+  'Eaug':  { frets: [0,3,2,1,1,0], fingers: [0,4,3,1,1,0], barre: null, baseFret: 1 },
+
+  // ── F ──────────────────────────────────────────────────────
+  'F':     { frets: [1,3,3,2,1,1], fingers: [1,3,4,2,1,1], barre: { fret: 1, from: 0, to: 5 }, baseFret: 1 },
+  'Fm':    { frets: [1,3,3,1,1,1], fingers: [1,3,4,1,1,1], barre: { fret: 1, from: 0, to: 5 }, baseFret: 1 },
+  'F7':    { frets: [1,3,1,2,1,1], fingers: [1,3,1,2,1,1], barre: { fret: 1, from: 0, to: 5 }, baseFret: 1 },
+  'Fmaj7': { frets: [1,3,3,2,1,0], fingers: [1,3,4,2,1,0], barre: null, baseFret: 1 },
+  'Fm7':   { frets: [1,3,1,1,1,1], fingers: [1,3,1,1,1,1], barre: { fret: 1, from: 0, to: 5 }, baseFret: 1 },
+  'Fsus2': { frets: [1,3,3,0,1,1], fingers: [1,3,4,0,1,1], barre: { fret: 1, from: 0, to: 1 }, baseFret: 1 },
+  'Fsus4': { frets: [1,3,3,3,1,1], fingers: [1,2,3,4,1,1], barre: { fret: 1, from: 0, to: 5 }, baseFret: 1 },
+  'Fdim':  { frets: [1,-1,0,1,-1,-1], fingers: [1,0,0,2,0,0], barre: null, baseFret: 1 },
+  'Faug':  { frets: [1,0,3,2,2,1], fingers: [1,0,4,2,3,1], barre: null, baseFret: 1 },
+
+  // ── F# / Gb ──────────────────────────────────────────────
+  'F#':     { frets: [2,4,4,3,2,2], fingers: [1,3,4,2,1,1], barre: { fret: 2, from: 0, to: 5 }, baseFret: 2 },
+  'F#m':    { frets: [2,4,4,2,2,2], fingers: [1,3,4,1,1,1], barre: { fret: 2, from: 0, to: 5 }, baseFret: 2 },
+  'F#7':    { frets: [2,4,2,3,2,2], fingers: [1,3,1,2,1,1], barre: { fret: 2, from: 0, to: 5 }, baseFret: 2 },
+  'F#maj7': { frets: [2,4,4,3,2,1], fingers: [2,4,4,3,2,1], barre: null, baseFret: 1 },
+  'F#m7':   { frets: [2,4,2,2,2,2], fingers: [1,3,1,1,1,1], barre: { fret: 2, from: 0, to: 5 }, baseFret: 2 },
+  'F#sus2': { frets: [2,4,4,1,2,2], fingers: [2,4,4,1,2,2], barre: null, baseFret: 1 },
+  'F#sus4': { frets: [2,4,4,4,2,2], fingers: [1,2,3,4,1,1], barre: { fret: 2, from: 0, to: 5 }, baseFret: 2 },
+  'F#dim':  { frets: [2,0,1,2,1,-1], fingers: [3,0,1,4,2,0], barre: null, baseFret: 1 },
+  'F#aug':  { frets: [2,1,0,3,3,2], fingers: [2,1,0,3,4,2], barre: null, baseFret: 1 },
+
+  // ── G ──────────────────────────────────────────────────────
+  'G':     { frets: [3,2,0,0,0,3], fingers: [2,1,0,0,0,3], barre: null, baseFret: 1 },
+  'Gm':    { frets: [3,5,5,3,3,3], fingers: [1,3,4,1,1,1], barre: { fret: 3, from: 0, to: 5 }, baseFret: 3 },
+  'G7':    { frets: [3,2,0,0,0,1], fingers: [3,2,0,0,0,1], barre: null, baseFret: 1 },
+  'Gmaj7': { frets: [3,2,0,0,0,2], fingers: [3,2,0,0,0,1], barre: null, baseFret: 1 },
+  'Gm7':   { frets: [3,5,3,3,3,3], fingers: [1,4,1,1,1,1], barre: { fret: 3, from: 0, to: 5 }, baseFret: 3 },
+  'Gsus2': { frets: [3,0,0,0,3,3], fingers: [2,0,0,0,3,4], barre: null, baseFret: 1 },
+  'Gsus4': { frets: [3,3,0,0,1,3], fingers: [3,4,0,0,1,2], barre: null, baseFret: 1 },
+  'Gdim':  { frets: [3,-1,2,3,2,-1], fingers: [3,0,1,4,2,0], barre: null, baseFret: 1 },
+  'Gaug':  { frets: [3,2,1,0,0,3], fingers: [3,2,1,0,0,4], barre: null, baseFret: 1 },
+
+  // ── G# / Ab ──────────────────────────────────────────────
+  'G#':     { frets: [4,6,6,5,4,4], fingers: [1,3,4,2,1,1], barre: { fret: 4, from: 0, to: 5 }, baseFret: 4 },
+  'G#m':    { frets: [4,6,6,4,4,4], fingers: [1,3,4,1,1,1], barre: { fret: 4, from: 0, to: 5 }, baseFret: 4 },
+  'G#7':    { frets: [4,6,4,5,4,4], fingers: [1,3,1,2,1,1], barre: { fret: 4, from: 0, to: 5 }, baseFret: 4 },
+  'G#maj7': { frets: [4,6,6,5,4,3], fingers: [2,4,4,3,2,1], barre: null, baseFret: 3 },
+  'G#m7':   { frets: [4,6,4,4,4,4], fingers: [1,3,1,1,1,1], barre: { fret: 4, from: 0, to: 5 }, baseFret: 4 },
+  'G#sus2': { frets: [4,6,6,3,4,4], fingers: [2,4,4,1,2,2], barre: null, baseFret: 3 },
+  'G#sus4': { frets: [4,6,6,6,4,4], fingers: [1,2,3,4,1,1], barre: { fret: 4, from: 0, to: 5 }, baseFret: 4 },
+  'G#dim':  { frets: [4,-1,3,4,3,-1], fingers: [3,0,1,4,2,0], barre: null, baseFret: 3 },
+  'G#aug':  { frets: [4,3,2,1,1,0], fingers: [4,3,2,1,1,0], barre: null, baseFret: 1 },
+
+  // ── A ──────────────────────────────────────────────────────
+  'A':     { frets: [-1,0,2,2,2,0], fingers: [0,0,1,2,3,0], barre: null, baseFret: 1 },
+  'Am':    { frets: [-1,0,2,2,1,0], fingers: [0,0,2,3,1,0], barre: null, baseFret: 1 },
+  'A7':    { frets: [-1,0,2,0,2,0], fingers: [0,0,2,0,3,0], barre: null, baseFret: 1 },
+  'Amaj7': { frets: [-1,0,2,1,2,0], fingers: [0,0,3,1,2,0], barre: null, baseFret: 1 },
+  'Am7':   { frets: [-1,0,2,0,1,0], fingers: [0,0,2,0,1,0], barre: null, baseFret: 1 },
+  'Asus2': { frets: [-1,0,2,2,0,0], fingers: [0,0,1,2,0,0], barre: null, baseFret: 1 },
+  'Asus4': { frets: [-1,0,2,2,3,0], fingers: [0,0,1,2,3,0], barre: null, baseFret: 1 },
+  'Adim':  { frets: [-1,0,1,2,1,-1], fingers: [0,0,1,3,2,0], barre: null, baseFret: 1 },
+  'Aaug':  { frets: [-1,0,3,2,2,1], fingers: [0,0,4,2,3,1], barre: null, baseFret: 1 },
+
+  // ── A# / Bb ──────────────────────────────────────────────
+  'A#':     { frets: [-1,1,3,3,3,1], fingers: [0,1,2,3,4,1], barre: { fret: 1, from: 1, to: 5 }, baseFret: 1 },
+  'A#m':    { frets: [-1,1,3,3,2,1], fingers: [0,1,3,4,2,1], barre: { fret: 1, from: 1, to: 5 }, baseFret: 1 },
+  'A#7':    { frets: [-1,1,3,1,3,1], fingers: [0,1,3,1,4,1], barre: { fret: 1, from: 1, to: 5 }, baseFret: 1 },
+  'A#maj7': { frets: [-1,1,3,2,3,1], fingers: [0,1,4,2,3,1], barre: { fret: 1, from: 1, to: 5 }, baseFret: 1 },
+  'A#m7':   { frets: [-1,1,3,1,2,1], fingers: [0,1,3,1,2,1], barre: { fret: 1, from: 1, to: 5 }, baseFret: 1 },
+  'A#sus2': { frets: [-1,1,3,3,1,1], fingers: [0,1,3,4,1,1], barre: { fret: 1, from: 1, to: 5 }, baseFret: 1 },
+  'A#sus4': { frets: [-1,1,3,3,4,1], fingers: [0,1,2,3,4,1], barre: { fret: 1, from: 1, to: 5 }, baseFret: 1 },
+  'A#dim':  { frets: [-1,1,2,3,2,-1], fingers: [0,1,2,4,3,0], barre: null, baseFret: 1 },
+  'A#aug':  { frets: [-1,1,4,3,3,2], fingers: [0,1,4,2,3,1], barre: null, baseFret: 1 },
+
+  // ── B ──────────────────────────────────────────────────────
+  'B':     { frets: [-1,2,4,4,4,2], fingers: [0,1,2,3,4,1], barre: { fret: 2, from: 1, to: 5 }, baseFret: 2 },
+  'Bm':    { frets: [-1,2,4,4,3,2], fingers: [0,1,3,4,2,1], barre: { fret: 2, from: 1, to: 5 }, baseFret: 2 },
+  'B7':    { frets: [-1,2,1,2,0,2], fingers: [0,2,1,3,0,4], barre: null, baseFret: 1 },
+  'Bmaj7': { frets: [-1,2,4,3,4,2], fingers: [0,1,4,2,3,1], barre: { fret: 2, from: 1, to: 5 }, baseFret: 2 },
+  'Bm7':   { frets: [-1,2,0,2,0,2], fingers: [0,2,0,3,0,4], barre: null, baseFret: 1 },
+  'Bsus2': { frets: [-1,2,4,4,2,2], fingers: [0,1,3,4,1,1], barre: { fret: 2, from: 1, to: 5 }, baseFret: 2 },
+  'Bsus4': { frets: [-1,2,4,4,5,2], fingers: [0,1,2,3,4,1], barre: { fret: 2, from: 1, to: 5 }, baseFret: 2 },
+  'Bdim':  { frets: [-1,2,3,4,3,-1], fingers: [0,1,2,4,3,0], barre: null, baseFret: 2 },
+  'Baug':  { frets: [-1,2,1,0,0,3], fingers: [0,3,2,0,0,4], barre: null, baseFret: 1 },
+};
+
+// Quick-access grid: the most commonly used chords for beginners
+const QUICK_CHORDS = ['C','G','D','A','E','Am','Em','Dm','F','C7','G7','D7','A7','E7','B7'];
+
+// Roots and qualities, used to build the search index and full browse list
+const CHORD_ROOTS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const CHORD_QUALITIES = [
+  { suffix: '',      label: 'Major' },
+  { suffix: 'm',     label: 'Minor' },
+  { suffix: '7',     label: 'Dominant 7th' },
+  { suffix: 'maj7',  label: 'Major 7th' },
+  { suffix: 'm7',    label: 'Minor 7th' },
+  { suffix: 'sus2',  label: 'Sus2' },
+  { suffix: 'sus4',  label: 'Sus4' },
+  { suffix: 'dim',   label: 'Diminished' },
+  { suffix: 'aug',   label: 'Augmented' },
+];
