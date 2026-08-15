@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   Viewer.init();
   Editor.init();
   Tuner.init();
+  Trainer.init();
 
   // ── OCR init ──────────────────────────────────────────────
   OCR.init((chordproText) => {
