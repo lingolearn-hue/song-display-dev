@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await DB.migrate();   // runs data migrations, seeds if empty
   Viewer.init();
   Editor.init();
+  Tuner.init();
 
   // ── OCR init ──────────────────────────────────────────────
   OCR.init((chordproText) => {
@@ -63,7 +64,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ── Screen navigation ─────────────────────────────────────
-  const navTabs = document.querySelectorAll('.nav-tab');
+  const navTabs  = document.querySelectorAll('.nav-tab');
+  const modeTabs = document.querySelectorAll('.mode-tab');
+  let currentMode = 'songbook';
 
   function showScreen(name) {
     ['songs','setlists','import','settings','viewer'].forEach(s => {
@@ -85,8 +88,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (name === 'setlists') SetlistManager.load(allSongs);
   }
 
+  // Top-level mode switch: Songbook / Tuner / Trainer
+  function showMode(mode) {
+    if (mode === currentMode) return;
+
+    // Leaving the tuner — stop the mic so it doesn't keep listening
+    if (currentMode === 'tuner') Tuner.onLeave();
+
+    currentMode = mode;
+    modeTabs.forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+
+    const isSongbook = mode === 'songbook';
+    document.getElementById('main-nav').style.display   = isSongbook ? '' : 'none';
+    document.getElementById('screen-tuner').classList.toggle('active', mode === 'tuner');
+    document.getElementById('screen-trainer').classList.toggle('active', mode === 'trainer');
+
+    if (isSongbook) {
+      // Restore whichever songbook sub-screen was last active (default: songs)
+      const activeSub = document.querySelector('.nav-tab.active');
+      showScreen(activeSub ? activeSub.dataset.screen : 'songs');
+    } else {
+      // Hide all songbook sub-screens while in another mode
+      ['songs','setlists','import','settings','viewer'].forEach(s => {
+        const el = document.getElementById('screen-' + s);
+        if (el) el.classList.remove('active');
+      });
+      document.body.classList.remove('viewing');
+    }
+  }
+
+  modeTabs.forEach(tab => tab.addEventListener('click', () => showMode(tab.dataset.mode)));
+
   navTabs.forEach(tab => tab.addEventListener('click', () => showScreen(tab.dataset.screen)));
-  document.querySelector('.nav-cta').addEventListener('click', () => showScreen('import'));
   document.getElementById('viewer-back').addEventListener('click', () => {
     Viewer.releaseWakeLock();
     showScreen('songs');
