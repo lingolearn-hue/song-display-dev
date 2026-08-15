@@ -412,10 +412,19 @@
 
 <!-- ═══ TRAINER (placeholder) ═══ -->
 <div id="screen-trainer" class="screen">
-  <div class="trainer-placeholder">
-    <div class="trainer-placeholder-icon">🎯</div>
-    <h3>Chord Trainer</h3>
-    <p>Coming soon — practice chord shapes and transitions.</p>
+  <div class="trainer-wrap">
+
+    <div class="chord-search-wrap" id="chord-search-wrap">
+      <input type="text" id="chord-search-input" class="chord-search-input"
+             placeholder="Search any chord — e.g. F#m7, Bbmaj7…" autocomplete="off">
+      <div id="chord-search-results" class="chord-search-results hidden"></div>
+    </div>
+
+    <div id="chord-diagram-container" class="chord-diagram-container"></div>
+
+    <div class="chord-quick-label">Common chords</div>
+    <div id="chord-quick-grid" class="chord-quick-grid"></div>
+
   </div>
 </div>
 
@@ -526,6 +535,8 @@
 </script>
 <script src="voice.js"></script>
 <script src="tuner.js"></script>
+<script src="chords-data.js"></script>
+<script src="trainer.js"></script>
 <script src="ocr.js"></script>
 <script src="app.js"></script>
 <script>
