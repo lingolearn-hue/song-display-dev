@@ -36,14 +36,12 @@
 </head>
 <body>
 
-<nav id="main-nav">
+<nav id="main-nav" class="songbook-subnav">
   <span class="nav-logo">song-display</span>
   <button class="nav-tab active" data-screen="songs">Songs</button>
   <button class="nav-tab" data-screen="setlists">Setlists</button>
   <button class="nav-tab" data-screen="import">Import</button>
   <button class="nav-tab" data-screen="settings">Settings</button>
-  <span class="nav-spacer"></span>
-  <button class="nav-cta">+ Add Song</button>
 </nav>
 
 <!-- ═══ SONG LIST ═══ -->
@@ -380,6 +378,60 @@
   </div>
 </div>
 
+<!-- ═══ TUNER ═══ -->
+<div id="screen-tuner" class="screen">
+  <div class="tuner-wrap">
+    <div class="tuner-string-row" id="tuner-string-row">
+      <button class="tuner-string-btn" data-note="E2">E</button>
+      <button class="tuner-string-btn" data-note="A2">A</button>
+      <button class="tuner-string-btn" data-note="D3">D</button>
+      <button class="tuner-string-btn" data-note="G3">G</button>
+      <button class="tuner-string-btn" data-note="B3">B</button>
+      <button class="tuner-string-btn" data-note="E4">E</button>
+    </div>
+
+    <div class="tuner-display">
+      <div class="tuner-note" id="tuner-note">—</div>
+      <div class="tuner-freq" id="tuner-freq">0.0 Hz</div>
+      <div class="tuner-meter">
+        <div class="tuner-meter-scale">
+          <span>♭</span><span class="tuner-meter-center-mark"></span><span>♯</span>
+        </div>
+        <div class="tuner-meter-track">
+          <div class="tuner-meter-center-line"></div>
+          <div class="tuner-meter-needle" id="tuner-needle"></div>
+        </div>
+        <div class="tuner-cents" id="tuner-cents">0 cents</div>
+      </div>
+    </div>
+
+    <button class="tuner-mic-btn" id="tuner-mic-btn">🎤 Start Tuner</button>
+    <p class="tuner-hint" id="tuner-hint">Tap start and allow microphone access, then pluck a string.</p>
+  </div>
+</div>
+
+<!-- ═══ TRAINER (placeholder) ═══ -->
+<div id="screen-trainer" class="screen">
+  <div class="trainer-placeholder">
+    <div class="trainer-placeholder-icon">🎯</div>
+    <h3>Chord Trainer</h3>
+    <p>Coming soon — practice chord shapes and transitions.</p>
+  </div>
+</div>
+
+<!-- ═══ BOTTOM MODE NAV ═══ -->
+<nav id="mode-nav">
+  <button class="mode-tab active" data-mode="songbook">
+    <span class="mode-icon">📖</span><span class="mode-label">Songbook</span>
+  </button>
+  <button class="mode-tab" data-mode="tuner">
+    <span class="mode-icon">🎸</span><span class="mode-label">Tuner</span>
+  </button>
+  <button class="mode-tab" data-mode="trainer">
+    <span class="mode-icon">🎯</span><span class="mode-label">Trainer</span>
+  </button>
+</nav>
+
 <!-- ═══ SONG EDITOR (slide-in panel) ═══ -->
 <div id="editor-backdrop" class="editor-backdrop"></div>
 <div id="editor-panel" class="editor-panel">
@@ -461,17 +513,8 @@
 <script src="editor.js"></script>
 <script src="setlist-manager.js"></script>
 <script>
-  // Block double-tap zoom on iOS
-  let lastTap = 0;
-  document.addEventListener('touchend', e => {
-    const now = Date.now();
-    if (now - lastTap < 300) e.preventDefault();
-    lastTap = now;
-  }, { passive: false });
-</script>
-<script>
-  // Block double-tap zoom robustly
-  // Method 1: touchstart preventDefault on rapid taps (most reliable on iOS)
+  // Block double-tap zoom robustly (touchstart fires earlier than touchend,
+  // preventing the browser's native zoom gesture before it starts)
   let _lastTapStart = 0;
   document.addEventListener('touchstart', e => {
     const now = Date.now();
@@ -482,6 +525,7 @@
   }, { passive: false });
 </script>
 <script src="voice.js"></script>
+<script src="tuner.js"></script>
 <script src="ocr.js"></script>
 <script src="app.js"></script>
 <script>
