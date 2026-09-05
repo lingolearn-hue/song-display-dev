@@ -5,11 +5,6 @@ const Viewer = (() => {
   // ── State ─────────────────────────────────────────────────
   let song          = null;
   let activeTextIdx = 0;
-
-  // ── Wake lock (prevent screen sleep during performance) ──
-  let wakeLock      = null;
-  let wakeTimer     = null;
-  const WAKE_MS     = 10 * 60 * 1000; // 10 minutes
   let pages         = [];
   let currentPage   = 0;
   let fontSize      = 12;
@@ -112,11 +107,64 @@ const Viewer = (() => {
     document.body.appendChild(probe);
 
     const result = []; let pageSections = []; let usedH = 0; const GAP = 8;
-    sections.forEach(sec => {
+
+    // Measure a section's rendered height in isolation
+    function measure(sec) {
       const wrapper = document.createElement('div');
       wrapper.appendChild(renderSection(sec));
       probe.innerHTML = ''; probe.appendChild(wrapper);
-      const secH = wrapper.getBoundingClientRect().height;
+      return wrapper.getBoundingClientRect().height;
+    }
+
+    // Split an oversized section into line-level chunks that each fit
+    // within availH on their own. Used only when a single section is too
+    // tall to fit on an empty page — this keeps a long verse from being
+    // silently clipped at the bottom with no next page to continue onto.
+    function splitOversizedSection(sec) {
+      const chunks = [];
+      let chunkLines = [];
+      // Re-show the section label on each continuation chunk so the reader
+      // always knows which verse/chorus they're in, even mid-split.
+      const label = sec.label;
+      for (let i = 0; i < sec.lines.length; i++) {
+        const candidate = { label, lines: [...chunkLines, sec.lines[i]] };
+        const h = measure(candidate);
+        if (chunkLines.length > 0 && h > availH) {
+          chunks.push({ label, lines: chunkLines });
+          chunkLines = [sec.lines[i]];
+        } else {
+          chunkLines.push(sec.lines[i]);
+        }
+      }
+      if (chunkLines.length) chunks.push({ label, lines: chunkLines });
+      return chunks;
+    }
+
+    sections.forEach(sec => {
+      let secH = measure(sec);
+
+      // Section too tall even alone on an empty page — split it into
+      // line-level chunks and feed those through the normal packer instead.
+      if (secH > availH) {
+        // Flush whatever's already queued for the current page first
+        if (pageSections.length) {
+          result.push(pageSections.map(x => x.sec));
+          pageSections = []; usedH = 0;
+        }
+        splitOversizedSection(sec).forEach(chunk => {
+          const chunkH = measure(chunk);
+          if (pageSections.length === 0) {
+            pageSections.push({ sec: chunk, secH: chunkH }); usedH = chunkH;
+          } else if (usedH + GAP + chunkH <= availH) {
+            pageSections.push({ sec: chunk, secH: chunkH }); usedH += GAP + chunkH;
+          } else {
+            result.push(pageSections.map(x => x.sec));
+            pageSections = [{ sec: chunk, secH: chunkH }]; usedH = chunkH;
+          }
+        });
+        return;
+      }
+
       if (pageSections.length === 0) {
         pageSections.push({ sec, secH }); usedH = secH;
       } else if (usedH + GAP + secH <= availH) {
@@ -337,29 +385,12 @@ const Viewer = (() => {
     setTimeout(() => ov.classList.remove('visible'), 2400);
   }
 
-  // ── Wake lock helpers ────────────────────────────────────
-  async function acquireWakeLock() {
-    if (!('wakeLock' in navigator)) return;
-    try {
-      // Release existing lock first
-      if (wakeLock) { await wakeLock.release(); wakeLock = null; }
-      wakeLock = await navigator.wakeLock.request('screen');
-      wakeLock.addEventListener('release', () => { wakeLock = null; });
-    } catch (_) { /* API unavailable or permission denied — silent */ }
-  }
-
-  function releaseWakeLock() {
-    clearTimeout(wakeTimer);
-    wakeTimer = null;
-    if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
-  }
-
-  // Call on any user activity in the viewer — resets the 10-min timer
-  function touchActivity() {
-    acquireWakeLock();
-    clearTimeout(wakeTimer);
-    wakeTimer = setTimeout(releaseWakeLock, WAKE_MS);
-  }
+  // Screen wake lock is now handled app-wide by WakeLockManager (see
+  // wakelock.js), which already tracks taps/swipes/keys globally. These
+  // wrappers just forward to it so existing call sites in this file (page
+  // turns, song open) still count as activity without duplicating logic.
+  function touchActivity() { WakeLockManager.touchActivity(); }
+  function releaseWakeLock() { /* no-op: app-wide manager owns the idle timer */ }
 
   // ── Open a song ───────────────────────────────────────────
   function openSong(songData) {
