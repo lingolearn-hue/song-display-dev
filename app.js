@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ── Boot ──────────────────────────────────────────────────
   await DB.open();
   await DB.migrate();   // runs data migrations, seeds if empty
+  WakeLockManager.init();
   Viewer.init();
   Editor.init();
   Tuner.init();
@@ -229,14 +230,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     return { langs, tags };
   }
 
+  // "My songs" — anything not part of the bundled public-domain songbook.
+  // Bundled songs use the fixed 'pd-###' ID scheme; every user-created or
+  // imported song gets a generated uuid() instead, so this needs no extra
+  // schema field or migration.
+  let mySongsOnly = false;
+  function isUserAdded(song) {
+    return !/^pd-\d+$/.test(song.id);
+  }
+
   function updateClearBtn() {
     const { langs, tags } = getSelectedFilters();
     const btn = document.getElementById('filter-clear');
-    if (btn) btn.classList.toggle('hidden', langs.size === 0 && tags.size === 0);
+    if (btn) btn.classList.toggle('hidden', langs.size === 0 && tags.size === 0 && !mySongsOnly);
+    const toggle = document.getElementById('my-songs-toggle');
+    if (toggle) toggle.classList.toggle('active', mySongsOnly);
   }
 
   function songMatchesFilters(song) {
     const { langs, tags } = getSelectedFilters();
+    if (mySongsOnly && !isUserAdded(song)) return false;
     if (langs.size > 0) {
       // AND logic: song must have a text in EACH of the selected languages
       const songLangs = new Set((song.texts || []).map(t => t.language));
@@ -268,7 +281,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('tag-filter').addEventListener('change', function() {
       onFilterChange(this, '🏷 Category');
     });
+    document.getElementById('my-songs-toggle').addEventListener('click', () => {
+      mySongsOnly = !mySongsOnly;
+      updateClearBtn();
+      renderSongList(searchEl.value);
+    });
     document.getElementById('filter-clear').addEventListener('click', () => {
+      mySongsOnly = false;
       buildFilterRow();  // rebuild fully — easiest way to reset to placeholder state
       renderSongList(searchEl.value);
     });
