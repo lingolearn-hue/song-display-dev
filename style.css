@@ -1528,6 +1528,25 @@ body.voice-active .voice-status { opacity: 1; }
 .filter-clear-btn.hidden { display: none; }
 .filter-clear-btn:hover { background: rgba(224,96,96,.08); }
 
+.filter-toggle-btn {
+  height: 28px;
+  padding: 0 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 12px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.filter-toggle-btn.active {
+  background: var(--chord-bg);
+  border-color: var(--chord);
+  color: var(--chord);
+}
+
 /* ── Block double-tap zoom ── */
 html { touch-action: manipulation; }
 
@@ -1572,11 +1591,14 @@ html { touch-action: manipulation; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 28px;
-  padding: 20px;
+  justify-content: flex-start;
+  padding: 32px 20px 20px;
   overflow-y: auto;
 }
+
+.tuner-string-row { margin-bottom: 32px; }
+.tuner-display    { margin-bottom: 8px; }
+.tuner-meter      { margin-bottom: 28px; }
 
 .tuner-string-row {
   display: flex;
@@ -1610,22 +1632,32 @@ html { touch-action: manipulation; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  width: 100%;
 }
 
 .tuner-note {
   font-family: var(--font-song);
-  font-size: 64px;
-  font-weight: 600;
+  font-size: 88px;
+  font-weight: 700;
   color: var(--text);
-  min-height: 76px;
-  line-height: 1;
+  height: 100px;
+  line-height: 100px;
+  width: 220px;
+  text-align: center;
+  /* Fixed box so the display never reflows/shifts when text changes
+     length (e.g. "—" vs "E2" vs "A#3") */
 }
 
 .tuner-freq {
-  font-size: 13px;
-  color: var(--muted);
+  font-size: 22px;
+  color: var(--sub);
   font-family: var(--font-song);
+  height: 30px;
+  line-height: 30px;
+  width: 160px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .tuner-meter {
@@ -1674,10 +1706,13 @@ html { touch-action: manipulation; }
 
 .tuner-cents {
   text-align: center;
-  font-size: 12px;
-  color: var(--muted);
+  font-size: 16px;
+  color: var(--sub);
   margin-top: 10px;
   font-family: var(--font-song);
+  height: 22px;
+  line-height: 22px;
+  font-variant-numeric: tabular-nums;
 }
 
 .tuner-mic-btn {
@@ -1702,6 +1737,7 @@ html { touch-action: manipulation; }
   color: var(--muted);
   text-align: center;
   max-width: 280px;
+  min-height: 32px;
 }
 .tuner-hint-error { color: var(--danger); }
 
