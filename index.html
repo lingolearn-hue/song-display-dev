@@ -55,6 +55,7 @@
       </select>
       <select id="tag-filter" class="filter-select" multiple size="1">
       </select>
+      <button class="filter-toggle-btn" id="my-songs-toggle" title="Show only songs you added">👤 My songs</button>
       <button class="filter-clear-btn hidden" id="filter-clear">✕</button>
     </div>
     <div id="song-list" class="song-list-items"></div>
@@ -514,6 +515,7 @@
   </div>
 </div>
 
+<script src="wakelock.js"></script>
 <script src="data.js"></script>
 <script src="db.js"></script>
 <script src="parser.js"></script>
