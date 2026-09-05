@@ -100,14 +100,28 @@ const Tuner = (() => {
     return freq;
   }
 
-  // ── Smoothing — average last few readings to reduce jitter ──
+  // ── Smoothing — median of recent readings to reduce jitter ──
   let recentFreqs = [];
   function smooth(freq) {
     recentFreqs.push(freq);
-    if (recentFreqs.length > 5) recentFreqs.shift();
+    if (recentFreqs.length > 8) recentFreqs.shift();
     const sorted = [...recentFreqs].sort((a, b) => a - b);
     return sorted[Math.floor(sorted.length / 2)]; // median — robust to outliers
   }
+
+  // ── Hold/hysteresis state ────────────────────────────────────
+  // Raw pitch detection drops out for single frames constantly (string
+  // decay, pick noise, brief silence between strokes) even while a note is
+  // clearly being held. Without smoothing this makes the whole display
+  // flicker blank ~10-20 times a second. Instead: only clear the display
+  // after a sustained period of no signal, and only update text/needle
+  // when the reading has been consistent for a few frames in a row.
+  const SILENCE_HOLD_MS = 600;   // keep last reading visible this long after signal drops
+  const MIN_STABLE_FRAMES = 3;   // require this many consecutive similar readings before updating display
+  let lastSignalTime = 0;
+  let lastDisplayedInfo = null;
+  let stableCandidate = null;
+  let stableCount = 0;
 
   // ── UI update ──────────────────────────────────────────────
   function updateDisplay(freq) {
@@ -115,8 +129,18 @@ const Tuner = (() => {
     const freqEl   = $('tuner-freq');
     const needleEl = $('tuner-needle');
     const centsEl  = $('tuner-cents');
+    const now = performance.now();
 
     if (freq < 0) {
+      // No pitch this frame — but don't blank immediately. Keep showing the
+      // last confident reading until SILENCE_HOLD_MS has elapsed with no
+      // signal at all, so brief gaps between strums don't cause flicker.
+      if (lastDisplayedInfo && now - lastSignalTime < SILENCE_HOLD_MS) return;
+      if (!lastDisplayedInfo) return; // already idle, nothing to clear
+
+      lastDisplayedInfo = null;
+      stableCandidate = null;
+      stableCount = 0;
       noteEl.textContent = '—';
       freqEl.textContent = '0.0 Hz';
       needleEl.style.transform = 'translateX(-50%)';
@@ -126,11 +150,27 @@ const Tuner = (() => {
       return;
     }
 
+    lastSignalTime = now;
     const smoothed = smooth(freq);
     const info = freqToNote(smoothed);
     if (!info) return;
 
-    noteEl.textContent = info.name + info.octave;
+    // Require a few consecutive frames landing on the same note before
+    // committing it to the display — prevents the note NAME from flickering
+    // between neighbours during attack transients or string noise. The
+    // needle/cents can still move continuously once a note is locked in,
+    // since that motion is expected and useful, not jitter.
+    const noteKey = info.name + info.octave;
+    if (stableCandidate === noteKey) {
+      stableCount++;
+    } else {
+      stableCandidate = noteKey;
+      stableCount = 1;
+    }
+    if (stableCount < MIN_STABLE_FRAMES && !lastDisplayedInfo) return;
+
+    lastDisplayedInfo = info;
+    noteEl.textContent = noteKey;
     freqEl.textContent = smoothed.toFixed(1) + ' Hz';
     centsEl.textContent = (info.cents > 0 ? '+' : '') + info.cents + ' cents';
 
@@ -150,6 +190,21 @@ const Tuner = (() => {
     highlightNearestString(smoothed);
   }
 
+  // Immediately reset the display, bypassing the silence-hold timer.
+  // Used when the user explicitly stops the tuner or leaves the screen.
+  function forceClearDisplay() {
+    lastDisplayedInfo = null;
+    stableCandidate = null;
+    stableCount = 0;
+    lastSignalTime = 0;
+    $('tuner-note').textContent = '—';
+    $('tuner-freq').textContent = '0.0 Hz';
+    $('tuner-needle').style.transform = 'translateX(-50%)';
+    $('tuner-needle').classList.remove('in-tune','sharp','flat');
+    $('tuner-cents').textContent = '';
+    clearStringHighlight();
+  }
+
   function highlightNearestString(freq) {
     const nearest = nearestString(freq);
     document.querySelectorAll('.tuner-string-btn').forEach(btn => {
@@ -161,11 +216,23 @@ const Tuner = (() => {
   }
 
   // ── Detection loop ─────────────────────────────────────────
+  let lastActivityTouch = 0;
   function tick() {
     if (!running) return;
     const buf = new Float32Array(analyser.fftSize);
     analyser.getFloatTimeDomainData(buf);
     const freq = autoCorrelate(buf, audioCtx.sampleRate);
+    // A detected pitch means the user is actively playing/tuning — treat it
+    // as activity so the screen doesn't lock mid-tuning even if they haven't
+    // touched the screen (only their guitar) for a while. Throttled to once
+    // every few seconds since this runs inside a 60fps loop.
+    if (freq > 0) {
+      const now = performance.now();
+      if (now - lastActivityTouch > 3000) {
+        WakeLockManager.touchActivity();
+        lastActivityTouch = now;
+      }
+    }
     updateDisplay(freq);
     rafId = requestAnimationFrame(tick);
   }
@@ -232,7 +299,7 @@ const Tuner = (() => {
     btn.classList.remove('active');
     $('tuner-hint').textContent = 'Tap start and allow microphone access, then pluck a string.';
     $('tuner-hint').classList.remove('tuner-hint-error');
-    updateDisplay(-1);
+    forceClearDisplay();
   }
 
   function toggle() { running ? stop() : start(); }
