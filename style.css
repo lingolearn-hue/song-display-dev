@@ -1872,28 +1872,71 @@ html { touch-action: manipulation; }
   flex-shrink: 0;
 }
 
-.chord-quick-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+.chord-quick-grid.chord-grid-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   flex-shrink: 0;
+  padding-bottom: 4px; /* room for scrollbar without clipping last row */
 }
 
-.chord-quick-btn {
-  height: 44px;
-  border-radius: var(--radius);
+.chord-grid-row {
+  display: flex;
+  gap: 2px;
+}
+
+.chord-grid-cell {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-song);
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+.chord-grid-corner { flex: 0 0 32px; width: 32px; }
+
+.chord-grid-colhead {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .3px;
+}
+
+.chord-grid-rowhead {
+  flex: 0 0 32px;
+  width: 32px;
+  font-family: var(--font-song);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--sub);
+}
+
+.chord-grid-btn {
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
-  font-family: var(--font-song);
-  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: border-color .15s, background .15s, color .15s;
 }
-.chord-quick-btn:hover { border-color: var(--chord); }
-.chord-quick-btn.active {
+.chord-grid-btn:hover { border-color: var(--chord); }
+.chord-grid-btn.active {
   background: var(--chord-bg);
   border-color: var(--chord);
   color: var(--chord);
+}
+
+.chord-grid-empty {
+  border: 1px dashed var(--border);
+  background: none;
+  color: var(--muted);
+  cursor: default;
 }
