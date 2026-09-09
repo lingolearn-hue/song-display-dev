@@ -87,16 +87,56 @@ const Trainer = (() => {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // ── Quick-access grid ──────────────────────────────────────
+  // ── Chord browse table — rows: natural roots, columns: quality (+ sharp) ──
   function buildQuickGrid() {
     const grid = $('chord-quick-grid');
     grid.innerHTML = '';
-    QUICK_CHORDS.forEach(name => {
-      const btn = document.createElement('button');
-      btn.className = 'chord-quick-btn';
-      btn.textContent = name;
-      btn.addEventListener('click', () => showChord(name));
-      grid.appendChild(btn);
+    grid.classList.add('chord-grid-table');
+
+    // Header row: blank corner cell, then one label per quality column
+    const headerRow = document.createElement('div');
+    headerRow.className = 'chord-grid-row chord-grid-header';
+    const corner = document.createElement('div');
+    corner.className = 'chord-grid-cell chord-grid-corner';
+    headerRow.appendChild(corner);
+    GRID_COLUMNS.forEach(col => {
+      const cell = document.createElement('div');
+      cell.className = 'chord-grid-cell chord-grid-colhead';
+      cell.textContent = col.label;
+      headerRow.appendChild(cell);
+    });
+    grid.appendChild(headerRow);
+
+    // One row per natural root
+    GRID_ROOTS.forEach(root => {
+      const row = document.createElement('div');
+      row.className = 'chord-grid-row';
+
+      const rowHead = document.createElement('div');
+      rowHead.className = 'chord-grid-cell chord-grid-rowhead';
+      rowHead.textContent = root;
+      row.appendChild(rowHead);
+
+      GRID_COLUMNS.forEach(col => {
+        const chordName = col.isSharp ? root + '#' : root + col.suffix;
+        const data = CHORD_LIBRARY[chordName];
+        const cell = document.createElement('button');
+        cell.className = 'chord-grid-cell chord-grid-btn';
+        if (!data) {
+          // No voicing on file for this combination — leave visibly empty
+          // rather than showing a button that goes nowhere.
+          cell.classList.add('chord-grid-empty');
+          cell.disabled = true;
+          cell.textContent = '–';
+        } else {
+          cell.textContent = chordName;
+          cell.dataset.chord = chordName;
+          cell.addEventListener('click', () => showChord(chordName));
+        }
+        row.appendChild(cell);
+      });
+
+      grid.appendChild(row);
     });
   }
 
@@ -168,8 +208,8 @@ const Trainer = (() => {
     currentChord = name;
     $('chord-diagram-container').innerHTML = renderDiagram(displayName || name, data);
     $('chord-diagram-container').classList.remove('empty');
-    document.querySelectorAll('.chord-quick-btn').forEach(b => {
-      b.classList.toggle('active', b.textContent === name);
+    document.querySelectorAll('.chord-grid-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.chord === name);
     });
   }
 
