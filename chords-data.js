@@ -147,6 +147,24 @@ const CHORD_LIBRARY = {
 // Quick-access grid: the most commonly used chords for beginners
 const QUICK_CHORDS = ['C','G','D','A','E','Am','Em','Dm','F','C7','G7','D7','A7','E7','B7'];
 
+// Full browse table: rows = the 7 natural-letter roots, columns = quality
+// (plus the sharp of that root as its own column). Every cell maps to a
+// key that exists in CHORD_LIBRARY — the full 108-chord set already covers
+// all of these, so no cell should ever come up empty in practice.
+const GRID_ROOTS = ['C','D','E','F','G','A','B'];
+const GRID_COLUMNS = [
+  { suffix: '',      label: 'Major' },
+  { suffix: 'm',     label: 'Minor' },
+  { suffix: '7',     label: '7th' },
+  { suffix: '#',     label: 'Sharp', isSharp: true },
+  { suffix: 'maj7',  label: 'Maj7' },
+  { suffix: 'm7',    label: 'Min7' },
+  { suffix: 'sus2',  label: 'Sus2' },
+  { suffix: 'sus4',  label: 'Sus4' },
+  { suffix: 'dim',   label: 'Dim' },
+  { suffix: 'aug',   label: 'Aug' },
+];
+
 // Roots and qualities, used to build the search index and full browse list
 const CHORD_ROOTS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const CHORD_QUALITIES = [
